@@ -182,7 +182,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2022-02-14 13:28:01 / 修改时间：13:04:50" itemprop="dateCreated datePublished" datetime="2022-02-14T13:28:01+08:00">2022-02-14</time>
+              <time title="创建时间：2022-02-14 13:28:01 / 修改时间：13:35:03" itemprop="dateCreated datePublished" datetime="2022-02-14T13:28:01+08:00">2022-02-14</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -208,42 +208,14 @@
           <h1 id="字典"><a href="#字典" class="headerlink" title="字典"></a>字典</h1><p>字典用<code>&#123;&#125;</code>表示</p>
 <p>字典里面存放了两样东西第一个是<code>键</code>你可以将这个东西理解为索引,当我们有这个<code>键</code>的时候,就不需要索引了</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 定义一个字典</span></span><br><span class="line">a = &#123;<span class="string">&quot;name&quot;</span> : <span class="string">&quot;wangyangzheng&quot;</span>,<span class="string">&quot;age&quot;</span> : <span class="number">18</span>,<span class="string">&quot;school&quot;</span> : <span class="string">&quot;asthu&quot;</span>&#125;</span><br><span class="line"><span class="comment"># 键：name, age,school</span></span><br><span class="line"><span class="comment"># 值：wangyangzheng,age,asthu</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 访问</span></span><br><span class="line"><span class="built_in">print</span>(a [<span class="string">&quot;name&quot;</span>]) </span><br><span class="line"><span class="comment">#记住这里要加上&quot;&quot;  </span></span><br><span class="line"><span class="comment">#如果没有加上会发生name没有定义的错误</span></span><br></pre></td></tr></table></figure>
-
-<p>字典是乱序的,如果我们判断两个字典是否相等，字典元素顺序不同，但是元素相同，是一样的</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">a = &#123;<span class="string">&#x27;1&#x27;</span> : <span class="number">1</span>, <span class="string">&#x27;2&#x27;</span> : <span class="number">2</span>&#125;</span><br><span class="line">b = &#123;<span class="string">&#x27;2&#x27;</span> : <span class="number">2</span>, <span class="string">&#x27;1&#x27;</span> : <span class="number">1</span>&#125;</span><br><span class="line"><span class="built_in">print</span>(a == b)</span><br><span class="line"><span class="comment"># 输出True</span></span><br></pre></td></tr></table></figure>
-<h2 id="对字典的操作方法"><a href="#对字典的操作方法" class="headerlink" title="对字典的操作方法"></a>对字典的操作方法</h2><ul>
-<li>keys()<br>我们通过.keys()返回字典的所有键</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">spam = &#123;<span class="string">&#x27;size&#x27;</span> : <span class="string">&#x27;fat&#x27;</span>,<span class="string">&#x27;color&#x27;</span> : <span class="string">&#x27;gray&#x27;</span>,<span class="string">&#x27;disposition&#x27;</span> : <span class="string">&#x27;loud&#x27;</span>&#125;</span><br><span class="line"><span class="comment"># 返回类似列表这种</span></span><br><span class="line"><span class="built_in">print</span>(spam.keys())</span><br><span class="line"></span><br><span class="line"><span class="comment">#逐个输出spam的键</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> spam.keys():</span><br><span class="line">  <span class="built_in">print</span>(i)</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>values()<br>.values()返回字典的所有值</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">spam = &#123;<span class="string">&#x27;size&#x27;</span> : <span class="string">&#x27;fat&#x27;</span>,<span class="string">&#x27;color&#x27;</span> : <span class="string">&#x27;gray&#x27;</span> ,<span class="string">&#x27;disposition&#x27;</span> : <span class="string">&#x27;loud&#x27;</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(spam.values())</span><br><span class="line"></span><br><span class="line"><span class="comment"># 逐个输出字典的值</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> spam.values():</span><br><span class="line">    <span class="built_in">print</span>(i)</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>items()<br>.items()返回字典的键值对,返回的是类似的类型</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">spam = &#123;<span class="string">&#x27;size&#x27;</span> : <span class="string">&#x27;fat&#x27;</span>,<span class="string">&#x27;color&#x27;</span> : <span class="string">&#x27;gray&#x27;</span> ,<span class="string">&#x27;disposition&#x27;</span> : <span class="string">&#x27;loud&#x27;</span>&#125;</span><br><span class="line"><span class="built_in">print</span>(spam.items())</span><br><span class="line"></span><br><span class="line"><span class="comment"># 逐个输出键值对</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> spam.items():</span><br><span class="line">    <span class="built_in">print</span>(i)</span><br></pre></td></tr></table></figure>
-<h2 id="字典是否存在某个值"><a href="#字典是否存在某个值" class="headerlink" title="字典是否存在某个值"></a>字典是否存在某个值</h2><p>如果这个值存在那就是in,如果没有那就是not int</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">spam = &#123;<span class="string">&#x27;size&#x27;</span> : <span class="string">&#x27;fat&#x27;</span>,<span class="string">&#x27;color&#x27;</span> : <span class="string">&#x27;gray&#x27;</span>,<span class="string">&#x27;disposition&#x27;</span> : <span class="string">&#x27;loud&#x27;</span>&#125;</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;name&#x27;</span> <span class="keyword">in</span> spam.keys()) <span class="comment"># 返回False 表示&#x27;name&#x27;不是spam的键</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;gray&#x27;</span> <span class="keyword">in</span> spam.values())<span class="comment"># 返回True 表示&#x27;gray&#x27;是spam的值</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;gray&#x27;</span> <span class="keyword">not</span> <span class="keyword">in</span> spam.keys())<span class="comment"># 返回False 表示&#x27;gray&#x27;不是spam的键</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="get-and-setdefault-方法"><a href="#get-and-setdefault-方法" class="headerlink" title="get() and setdefault 方法"></a>get() and setdefault 方法</h2><ul>
-<li>get()<br>get()方法有两个参数,第一个参数是要取的值对应的键,第二个参数是要返回的备用值(如果这个键不存在)</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">spam = &#123;<span class="string">&#x27;apple&#x27;</span> : <span class="number">5</span>,<span class="string">&#x27;cups&#x27;</span> : <span class="number">2</span>&#125;</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;I&#x27;m bring&quot;</span> + <span class="built_in">str</span>(spam.get(<span class="string">&#x27;cups&#x27;</span>,<span class="number">0</span>)) + <span class="string">&#x27;cups&#x27;</span> ) <span class="comment"># 2</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;I&#x27;m bring&quot;</span> + <span class="built_in">str</span>(spam.get(<span class="string">&#x27;pen&#x27;</span>,<span class="number">0</span>)) + <span class="string">&#x27;pens&#x27;</span>) <span class="comment">#输出备用值 0</span></span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>setdefault()<br>setdefault()方法也有两个参数,第一个参数是要取的值对应的键,第二个参数是备用值</li>
-</ul>
-<p>如果这个键不存在,那就将键和值都放入字典中</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">spam = &#123;<span class="string">&#x27;1&#x27;</span>:<span class="number">1</span>&#125;</span><br><span class="line"><span class="built_in">print</span>(spam.setdefault(<span class="string">&#x27;1&#x27;</span>,<span class="number">0</span>))</span><br><span class="line"><span class="built_in">print</span>(spam.setdefault(<span class="string">&#x27;2&#x27;</span>,<span class="number">2</span>))</span><br></pre></td></tr></table></figure>
-<p>我们发现第三行输出的值是2</p>
-<p>这是因为’2’这个键不存在,setdefault方法将这个键和值都添加进去了</p>
-<p>我们可以验证一下</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(spam)</span><br></pre></td></tr></table></figure>
-<p>发现确实如此</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/02/14/dic/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
