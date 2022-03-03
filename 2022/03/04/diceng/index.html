@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/xxw/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="值放在堆上还是栈上 来源:极客时间陈天的Rust这篇文章由@zhengel整理,侵权联系删除">
+<meta property="og:type" content="article">
+<meta property="og:title" content="值放在堆上还是栈上">
+<meta property="og:url" content="http://example.com/2022/03/04/diceng/index.html">
+<meta property="og:site_name" content="zhengel">
+<meta property="og:description" content="值放在堆上还是栈上 来源:极客时间陈天的Rust这篇文章由@zhengel整理,侵权联系删除">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/7d34fea50c6ad5b553e100743947d5c2.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/f376cdff5d73fe167dc1529c93547a12.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/cf94c61e135287bc6e21c8832361a8f4.png">
+<meta property="article:published_time" content="2022-03-03T17:05:42.110Z">
+<meta property="article:modified_time" content="2022-03-03T17:05:05.618Z">
+<meta property="article:author" content="wangyangzheng">
+<meta property="article:tag" content="底层">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/img_convert/7d34fea50c6ad5b553e100743947d5c2.png">
+
+<link rel="canonical" href="http://example.com/2022/03/04/diceng/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>值放在堆上还是栈上 | zhengel</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">zhengel</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/04/diceng/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="wangyangzheng">
+      <meta itemprop="description" content="十年饮冰,难凉热血">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zhengel">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          值放在堆上还是栈上
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-03-04 01:05:42 / 修改时间：01:05:05" itemprop="dateCreated datePublished" datetime="2022-03-04T01:05:42+08:00">2022-03-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%BA%95%E5%B1%82/" itemprop="url" rel="index"><span itemprop="name">底层</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="值放在堆上还是栈上"><a href="#值放在堆上还是栈上" class="headerlink" title="值放在堆上还是栈上"></a>值放在堆上还是栈上</h1><blockquote>
+<p>来源:极客时间陈天的Rust<br>这篇文章由@zhengel整理,侵权联系删除</p>
+</blockquote>
+<span id="more"></span>
+
+<h1 id="内存"><a href="#内存" class="headerlink" title="内存"></a>内存</h1><p>来看这样一段代码：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="variable">str</span> = <span class="string">&quot;hello, world&quot;</span>.<span class="title function_ invoke__">to_String</span>();</span><br></pre></td></tr></table></figure>
+<p>在Rust中这段赋值语句中就和<code>栈</code>,<code>堆</code>,<code>方法区</code>有交互</p>
+<ol>
+<li>首先hello,world作为一个字符串常量，被存入<strong>常量区</strong>中,(RODATA, RDATA),当程序加载时获得一定固定的内存地址</li>
+<li>当执行<code>&quot;hello，world&quot;.to_string()</code>时，在堆上，一段新的内存被分配出来，并把<code>hello，world</code>逐个拷贝过去</li>
+<li>当我们赋值时候也就是将<code>hello,world！</code>赋值给str时候，str作为栈上一个变量，它需要知道堆上的内存地址</li>
+<li>之外由于堆上的数据大小不确定，可以增长，我们还需要知道它的长度，以及现有多大</li>
+</ol>
+<blockquote>
+<p><strong>第一个表示指针，第二个表示字符串当前长度(11)，第三个表示这片内存的总容量，64位操作系统下，三个空间有24字节</strong></p>
+</blockquote>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/7d34fea50c6ad5b553e100743947d5c2.png"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span> src [<span class="number">50</span>] = <span class="string">&quot;http://www.runoob.com&quot;</span>;</span><br><span class="line">    <span class="type">char</span> dest[<span class="number">50</span>];</span><br><span class="line">    <span class="comment">/*void* mermcpy(void* str,const void *str2, size_t n);</span></span><br><span class="line"><span class="comment">     *从储存区域str2赋值n个字节到储存区str1</span></span><br><span class="line"><span class="comment">     *参数str1---&gt;指向用于储存复制内容的目标数组,内容强制转化为void*指针</span></span><br><span class="line"><span class="comment">     *参数str2---&gt;指向要复制的数据源,类型强制转化为void*指针</span></span><br><span class="line"><span class="comment">     *要被复制的字节数</span></span><br><span class="line"><span class="comment">     *返回一个指向目标存储区的str1指针</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="built_in">memcpy</span>(dest, src, <span class="built_in">strlen</span>(src)+<span class="number">1</span>);<span class="comment">//最后一个为\0</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s&quot;</span>, dest);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>基本类型放在栈上，少量数据存储在堆上</li>
+</ul>
+<h1 id="栈"><a href="#栈" class="headerlink" title="栈"></a>栈</h1><blockquote>
+<p>栈是程序运行的基础，<strong>每当一个函数被调用时,一段连续的内存就会在栈顶被分配出来，这段内存就称之为帧</strong>，栈先进后出</p>
+</blockquote>
+<blockquote>
+<p>栈是<strong>自顶向下</strong>增长的，一个程序调用栈最底部，除去<strong>入口帧</strong>，就是main()函数对应的帧，而随着main函数一层层调用，栈会一层层的扩展，调用结束,栈会一层层的回朔，将内存释放出去</p>
+</blockquote>
+<blockquote>
+<p>在调用过程中，一个新的帧会分配足够的空间<strong>存储寄存器的上下文</strong>,<br>在函数中使用到的通用寄存器会在栈中保存一个副本，当这个函数<br>调用结束，通过副本，可以恢复成原本的寄存器的上下文，就像什么都没有经历过一样，此外函数所使用到的局部变量，也都会在帧分配的时候被预留出来</p>
+</blockquote>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/f376cdff5d73fe167dc1529c93547a12.png"></p>
+<p>那么一个函数运行时候，怎们确定要开多大的帧呢？</p>
+<blockquote>
+<p>这是主要取决于编译器，在编译并优化代码的时候，一个函数就是一个最小的编译单元，在这个函数中，<strong>编译器知道要用到哪些寄存器，栈上放哪些局部变量，编译器就要明白每个局部变量的大小，以便预留空间</strong></p>
+</blockquote>
+<p>这是就要注意：</p>
+<blockquote>
+<p><strong>在编译的时候,一切无法确定大小或者大小可以改变的数据，都无法安全的放在栈上面，最好放在堆上面</strong>，比如一个函数，参数是字符串</p>
+</blockquote>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">say_name</span>(name: <span class="type">String</span>)&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//调用say_name函数</span></span><br><span class="line"><span class="title function_ invoke__">say_name</span>(<span class="string">&quot;wangyangzheng&quot;</span>.<span class="title function_ invoke__">to_String</span>());</span><br><span class="line"><span class="title function_ invoke__">say_name</span>(<span class="string">&quot;wangturing&quot;</span>.<span class="title function_ invoke__">to_String</span>());</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>字符串在编译时候大小不确定，<strong>直到运行是才知道大小</strong><br>所以我们无法将字符串本生放在栈上，只能将其放在堆上，然后在栈上</p>
+</blockquote>
+<h2 id="放在栈上的问题"><a href="#放在栈上的问题" class="headerlink" title="放在栈上的问题"></a>放在栈上的问题</h2><p>栈上的内存分配是非常高效的，只需要改动栈指针(stck pointer),既可以预留相应的空间，把栈指针改动回来，预留空间就会被释放</p>
+<blockquote>
+<p>预留和释放只改动寄存器，不涉及额外计算，不涉及系统调用，效率极高</p>
+</blockquote>
+<p>我们为什么在实际工作中，避免把大量数据分配到栈上？</p>
+<p>这主要考虑到调用栈的大小，避免栈溢出(stack overflow)，这时候程序就会被系统终止，产生崩溃信息</p>
+<p>一个递归函数不断调用自已，每次调用形成一个新的帧，递归函数无法终止<br>最终<code>stack overflow</code></p>
+<h1 id="堆"><a href="#堆" class="headerlink" title="堆"></a>堆</h1><p>栈虽然使用高效，但局限也十分明显，</p>
+<ul>
+<li>当我们需要<strong>动态大小的内存的时候，只能使用堆</strong>，比如可变长的数组(vector C++,Java ArrayList),列表，哈希表，字典， 它们都分配在堆上<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">arr</span> = <span class="type">Vec</span> :: <span class="title function_ invoke__">new</span>();</span><br><span class="line">arr.<span class="title function_ invoke__">push</span>(<span class="number">1</span>);</span><br><span class="line">arr.<span class="title function_ invoke__">push</span>(<span class="number">2</span>);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>这个列表实际预留的大小是4， 并不等于其长度为2</strong><br>这是因为堆上内存分配会使用<code>libc</code>提供的的<code>malloc()</code>函数，其内部请求操作系统的系统调用，来分配内存。系统的调用的代价是昂贵的，所以我们要避免频繁的使用<code>malloc()</code></p>
+</blockquote>
+</li>
+</ul>
+<blockquote>
+<p>对上面的代码，如果</p>
+</blockquote>
+<ul>
+<li>除了动态大小的内存需要被分配堆上，<strong>动态生命周期的内存也需要分配到堆上</strong><br>堆上分配出来的每一块内存需要显式的释放<blockquote>
+<p><strong>这就使堆上内存有更加灵活的生命周期，可以在不同的调用栈之间共享数据</strong></p>
+</blockquote>
+</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/cf94c61e135287bc6e21c8832361a8f4.png"></p>
+<h1 id="放在堆上的问题"><a href="#放在堆上的问题" class="headerlink" title="放在堆上的问题"></a>放在堆上的问题</h1><p>堆内存的这种灵活性也给内存管理带来很多挑战</p>
+<blockquote>
+<p>若手工管理堆内存的话，堆上的内存后忘记释放，就会造成<strong>内存释放</strong><br>一旦内存泄漏，程序运行的久，就越吃内存，最终因为占满内存而被操作系统终止运行。</p>
+</blockquote>
+<blockquote>
+<p><strong>如果堆上内存被多个线程的调用栈引用</strong>，该内存的改动要特别小心，需要加<strong>锁</strong>以独占访问，来避免潜在的问题</p>
+<blockquote>
+<p>比如，一个线程在遍历列表，而另一个线程在释放列表中的某一项，就可能访问野指针，<strong>导致堆越界</strong>，堆越界是第一大内存安全问题</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>堆上的内存释放，但栈上指向堆上内存的相应指针，就可能发生使用释放内存的情况，程序轻则崩溃，重则有安全隐患，这是第二大内存安全问题。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%BA%95%E5%B1%82/" rel="tag"># 底层</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/03/02/alo/" rel="prev" title="基础算法">
+      <i class="fa fa-chevron-left"></i> 基础算法
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%80%BC%E6%94%BE%E5%9C%A8%E5%A0%86%E4%B8%8A%E8%BF%98%E6%98%AF%E6%A0%88%E4%B8%8A"><span class="nav-number">1.</span> <span class="nav-text">值放在堆上还是栈上</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%85%E5%AD%98"><span class="nav-number">2.</span> <span class="nav-text">内存</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%88"><span class="nav-number">3.</span> <span class="nav-text">栈</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%94%BE%E5%9C%A8%E6%A0%88%E4%B8%8A%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">3.1.</span> <span class="nav-text">放在栈上的问题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A0%86"><span class="nav-number">4.</span> <span class="nav-text">堆</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%94%BE%E5%9C%A8%E5%A0%86%E4%B8%8A%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">5.</span> <span class="nav-text">放在堆上的问题</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">wangyangzheng</p>
+  <div class="site-description" itemprop="description">十年饮冰,难凉热血</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="mailto:wangyangzheng11292021@outlook.com" title="E-Mail → mailto:wangyangzheng11292021@outlook.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title">
+      <i class="fa fa-fw fa-link"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/weixin_61197640?spm=1011.2124.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;weixin_61197640?spm&#x3D;1011.2124.3001.5343" rel="noopener" target="_blank">CSDN</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://music.163.com/#/user/home?id=1645254544" title="https:&#x2F;&#x2F;music.163.com&#x2F;#&#x2F;user&#x2F;home?id&#x3D;1645254544" rel="noopener" target="_blank">网易云音乐</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://space.bilibili.com/1983181630?spm_id_from=333.1007.0.0" title="https:&#x2F;&#x2F;space.bilibili.com&#x2F;1983181630?spm_id_from&#x3D;333.1007.0.0" rel="noopener" target="_blank">B站</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wangyangzheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/xxw/anime.min.js"></script>
+  <script src="/xxw/velocity/velocity.min.js"></script>
+  <script src="/xxw/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
